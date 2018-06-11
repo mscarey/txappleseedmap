@@ -1,130 +1,118 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Texas School Discipline</title>
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
-    <link rel="shortcut icon" href="favicon.ico" />
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css">
-    <link rel="stylesheet" href="js/vendor/leaflet/leaflet.css" />
-    <link rel="stylesheet" href="css/cartodb.css">
-    <link rel="stylesheet" href="css/style.css">
-
-  </head>
-
-  <body>
-		<header class="masthead">
-			<h1 class="masthead__logo"></h1>
-			<div class="masthead__content">
-				<h1 class="masthead__title h2">Texas School Discipline Punishments by Race/Ethnicity<br>Pre-K through 12th Grade (2015-16)</h1>
-				<span class="masthead__disclaimer">Data Source: Texas Education Agency. Download the <a href="https://data.world/mcarey/tx-student-suspensions-2015">full dataset at data.world</a></span>
-
-            <div class="masthead_right">
-              <div class="masthead_select">
-                <select id="dropdown">
-                  <option value="OSS">Out of School Suspensions</option>
-                  <option value="Expulsion">Expulsion Actions</option>
-                  <option value="AltEdu">Alternative Placements</option>
-                  <option value="ISS">In School Suspensions</option>
-                </select>
-              </div>
-              <div class="masthead_select student_characteristic_selector">
-                <select id="dropdown">
-                  <option value="0">Black/African American Students</option>
-                  <option value="1">Asian Students</option>
-                  <option value="2">Latino Students</option>
-                  <option value="3">Native American Students</option>
-                  <option value="4">Special Education Students</option>
-                  <option value="5">Students of two or More Races</option>
-                  <option value="6">White Students</option>
-                </select>
-              </div>
-               <form class="masthead_search" role="search">
-                <div>
-                  <input id="searchbox" type="text" placeholder="Search by district" class="form-control">
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Texas School Discipline Disparities</title>
+		<script type="text/javascript" src="./js/d3.js"></script>
+        <link rel="shortcut icon" href="favicon.ico" />
+        <link rel="stylesheet" href="css/style.css">
+    </head>
+    <body>
+        <header class="masthead">
+                <h1 class="masthead__logo"></h1>
+                <div class="masthead__content">
+                    <h1 class="masthead__title h2">Texas School Discipline Punishments by Race/Ethnicity<br>Pre-K through 12th Grade (2015-16)</h1>
+                    <span class="masthead__disclaimer">Data Source: Texas Education Agency. Download the <a href="https://data.world/mcarey/tx-student-suspensions-2015">full dataset at data.world</a></span>
+    
+                <div class="masthead_right">
+                    <div class="masthead_select">
+                    <select id="dropdown">
+                        <option value="OSS">Out of School Suspensions</option>
+                        <option value="Expulsion">Expulsion Actions</option>
+                        <option value="AltEdu">Alternative Placements</option>
+                        <option value="ISS">In School Suspensions</option>
+                    </select>
+                    </div>
+                    <div class="masthead_select student_characteristic_selector">
+                    <select id="dropdown">
+                        <option value="0">Black/African American Students</option>
+                        <option value="1">Asian Students</option>
+                        <option value="2">Latino Students</option>
+                        <option value="3">Native American Students</option>
+                        <option value="4">Special Education Students</option>
+                        <option value="5">Students of two or More Races</option>
+                        <option value="6">White Students</option>
+                    </select>
+                    </div>
+                    <form class="masthead_search" role="search">
+                    <div>
+                        <input id="searchbox" type="text" placeholder="Search by district" class="form-control">
+                    </div>
+                    </form>
                 </div>
-              </form>
-            </div>
-            </div></header>
+                </div></header>
+    	<script type="text/javascript">
 
-    <div class="viewport" id="leMap">
-      <div id="map" class="map">
-      </div>
-      <div class="selector z-400">
-        <header class="selector__header">
-          <span class="selector__title">Out of School Suspensions</span>
-        </header>
-        <ul class="selector__list">
-          <li class="selector__item">
-            <button class="selector__button selector__button--active" data-group-id="0">Black/African American Students</button>
-          </li>
-          <li class="selector__item">
-            <button class="selector__button" data-group-id="1">Asian Students</button>
-          </li>
-          <li class="selector__item">
-            <button class="selector__button" data-group-id="2">Latino Students</button>
-          </li>
-          <li class="selector__item">
-            <button class="selector__button" data-group-id="3">Native American Students</button>
-          </li>
-          <li class="selector__item">
-            <button class="selector__button" data-group-id="4">Special Education Students</button>
-          </li>
-          <li class="selector__item">
-            <button class="selector__button" data-group-id="5">Students of two or More Races</button>
-          </li>
-          <li class="selector__item">
-            <button class="selector__button" data-group-id="6">White Students</button>
-          </li>
-        </ul>
-      </div>
+            //Width and height
+            var w = 800;
+            var h = 600;
 
-      <div class="cartodb-legend-stack z-400">
-        <div class='cartodb-legend density'>
-          <ul>
-             <li class="min">
-                <span class="legend-title">Punishments per Capita</span><br>
-                <span class="legend-subtitle">(compared to statewide district average)</span>
-             </li>
+            //Default incident characteristics
+            var demo = "Black/African-American Students";
+            var action = "Out of School Suspensions";
 
-             <li class="graph leg" style="border-radius: 0; border:none">
-             <div class="colors">
-               <div class="quartile" style="background-color:#54278f"></div>
-               <div class="quartile" style="background-color:#756bb1"></div>
-               <div class="quartile" style="background-color:#9e9ac8"></div>
-               <div class="quartile" style="background-color:#bcbddc"></div>
-               <div class="quartile" style="background-color:#dadaeb"></div>
-               <div class="quartile" style="background-color:#f2f0f7"></div>
-               <div class="quartile" style="background-color:#fee5d9"></div>
-               <div class="quartile" style="background-color:#fcbba1"></div>
-               <div class="quartile" style="background-color:#fc9272"></div>
-               <div class="quartile" style="background-color:#fb6a4a"></div>
-               <div class="quartile" style="background-color:#de2d26"></div>
-               <div class="quartile" style="background-color:#a50f15"></div>
-             </div>
-             </li>
-             <li class="margin-bottom">
-               <div class="quartile graph-sublegend" style="padding-top: 5px; float:left;" >
-                 Fewer than Average
-               </div>
-               <div class="quartile graph-sublegend-right" style="padding-top: 5px; float:right;" >
-                 More than Average
-               </div>
-             </li>
-          </ul>
-        </div>
-      </div>
+            //Define map projection
+            var projection = d3.geoAlbersUsa()
+                                    .translate([w/2, 0])
+                                    .scale([2000]);
 
-		</div>
+            //Define path generator
+            var path = d3.geoPath()
+                                .projection(projection);
+            
+            //Define scale to sort data values into buckets of color
+            var color = d3.scaleOrdinal(d3.schemeRdYlGn[11]);
 
-    <script src='https://code.jquery.com/jquery-2.2.4.min.js'></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/d3/4.3.0/d3.js'></script>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/d3-queue/3.0.3/d3-queue.js'></script>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js'></script>
-    <script src="https://d3js.org/topojson.v1.min.js"></script>
-    <script src="js/vendor/leaflet/leaflet.js"></script>
-    <script src="js/leaflet.pattern.js"></script>
-    <script src="js/index.js"></script>
-  </body>
+            //Create SVG element
+            var svg = d3.select("body")
+                        .append("svg")
+                        .attr("width", w)
+                        .attr("height", h);
+            
+            d3.json("./geojson/districts_with_default_data.geojson").then(function(json) {
+                
+                color.domain([0,10]);
+
+                //Bind data and create one path per GeoJSON feature
+                svg.selectAll("path")
+                    .data(json.features)
+                    .enter()
+                    .append("path")
+                    .attr("d", path)
+                    .style("fill", function(d) {
+                        //Get data value
+                        var value = d.properties.disparity;
+                        
+                        if (value) {
+                            //If value exists…
+                            return color(value);
+                        } else {
+                            //If value is undefined…
+                            return "#ccc";
+                        }
+                    })
+                    .append("title")
+                    .text(function(d) {
+                        var actions = d.properties.groupActions;
+                        
+                        if (actions) {
+                            
+                            return "In " + d.properties.DISTNAME +
+                            ", " + action + " were assigned " + 
+                            d.properties.groupActions + " times to the population of " +
+                            d.properties.groupPop + " " + demo + ", compared to " +
+                            d.properties.allActions + " times for the overall population of " +
+                            d.properties.allPop + " students.";
+                        }
+
+                        else { 
+                            return "Data is not available for " +
+                            action + " assigned to " + demo +
+                            " in " + d.properties.DISTNAME}
+                });
+             
+            });
+
+        </script>
+    </body>
 </html>
