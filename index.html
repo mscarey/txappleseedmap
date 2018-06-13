@@ -28,11 +28,13 @@
                     <select id="dropdown">
                         <option value="0">Black/African American Students</option>
                         <option value="1">Asian Students</option>
-                        <option value="2">Latino Students</option>
-                        <option value="3">Native American Students</option>
-                        <option value="4">Special Education Students</option>
-                        <option value="5">Students of two or More Races</option>
-                        <option value="6">White Students</option>
+                        <option value="2">Economically Disadvantaged Students</option>
+                        <option value="3">Latino Students</option>
+                        <option value="4">Native American Students</option>
+                        <option value="5">Special Education Students</option>
+                        <option value="6">Students of two or More Races</option>
+                        <option value="7">White Students</option>
+                        <option value="8">All Students</option>
                     </select>
                     </div>
                     <form class="masthead_search" role="search">
@@ -54,7 +56,7 @@
 
             //Define map projection
             var projection = d3.geoAlbersUsa()
-                                    .translate([w/2, 0])
+                                    .translate([2 * w / 5, 0])
                                     .scale([2000]);
 
             //Define path generator
@@ -69,7 +71,7 @@
                         .append("svg")
                         .attr("width", w)
                         .attr("height", h);
-            
+
             d3.json("./geojson/districts_with_default_data.geojson").then(function(json) {
                 
                 color.domain([0,10]);
@@ -92,37 +94,61 @@
                             return "#ccc";
                         }
                     })
-                    .append("title")
-                    .text(function(d) {
-                        var actions = d.properties.groupActions;
-                        
-                        if (actions) {
-                            
-                            return "In " + d.properties.DISTNAME +
-                            ", " + action + " were assigned " + 
+                    .on("mouseover", function(d) {
+
+                        if (d.properties.groupActions) {
+                            var comment = "In " + d.properties.DISTNAME +
+                            ", " + action + " were given " + 
                             d.properties.groupActions + " times to the population of " +
                             d.properties.groupPop + " " + demo + ", compared to " +
                             d.properties.allActions + " times for the overall population of " +
-                            d.properties.allPop + " students.";
+                            d.properties.allPop + " students."
+                        }
+                        else {
+                            var comment = "No data available for " +
+                            action + " of " + demo +
+                            " in " + d.properties.DISTNAME + "."
                         }
 
-                        else { 
-                            return "Data is not available for " +
-                            action + " assigned to " + demo +
-                            " in " + d.properties.DISTNAME}
-                });
-            
-            svg.append("g")
-                .attr("class", "legendLinear")
-                .attr("transform", "translate(20,20)");
-            
-            var legendLinear = d3.legendColor()
-                .shapeWidth(30)
-                .orient('horizontal')
-                .scale(color);
-            
-            svg.select(".legendLinear")
-                .call(legendLinear);
+                        //Get mouse's x/y values, then augment for the tooltip
+                        var coords = d3.mouse(this);
+
+                        //Create the tooltip label
+                        svg.append("rect")
+                        .attr("id", "tooltip")
+                        .attr("x", coords[0] - 20)
+                        .attr("y", coords[1] - 10)
+                        .attr("pointer-events", "none")
+                        
+
+                        //Create the tooltip label
+                        svg.append("text")
+                        .attr("id", "caption")
+                        .attr("x", coords[0])
+                        .attr("y", coords[1])
+                        .attr("pointer-events", "none")
+                        .html(comment);
+
+                        })
+                    .on("mouseout", function() {
+
+                        //Remove the tooltip
+                        d3.select("#tooltip").remove();
+                        d3.select("#caption").remove();
+
+                        })
+
+                svg.append("g")
+                    .attr("class", "legendLinear")
+                    .attr("transform", "translate(20,20)");
+                
+                var legendLinear = d3.legendColor()
+                    .shapeWidth(30)
+                    .orient('horizontal')
+                    .scale(color);
+                
+                svg.select(".legendLinear")
+                    .call(legendLinear);
 
 
             });
