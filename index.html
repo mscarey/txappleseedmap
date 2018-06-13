@@ -3,7 +3,8 @@
 	<head>
 		<meta charset="utf-8">
 		<title>Texas School Discipline Disparities</title>
-		<script type="text/javascript" src="./js/d3.js"></script>
+        <script type="text/javascript" src="./js/d3.js"></script>
+        <script type="text/javascript" src="./js/d3-legend.js"></script>
         <link rel="shortcut icon" href="favicon.ico" />
         <link rel="stylesheet" href="css/style.css">
     </head>
@@ -11,7 +12,7 @@
         <header class="masthead">
                 <h1 class="masthead__logo"></h1>
                 <div class="masthead__content">
-                    <h1 class="masthead__title h2">Texas School Discipline Punishments by Race/Ethnicity<br>Pre-K through 12th Grade (2015-16)</h1>
+                    <h1 class="masthead__title h2">Disparities in TX School Disciplinary Actions<br>Pre-K through 12th Grade</h1>
                     <span class="masthead__disclaimer">Data Source: Texas Education Agency. Download the <a href="https://data.world/mcarey/tx-student-suspensions-2015">full dataset at data.world</a></span>
     
                 <div class="masthead_right">
@@ -110,7 +111,20 @@
                             action + " assigned to " + demo +
                             " in " + d.properties.DISTNAME}
                 });
-             
+            
+            svg.append("g")
+                .attr("class", "legendLinear")
+                .attr("transform", "translate(20,20)");
+            
+            var legendLinear = d3.legendColor()
+                .shapeWidth(30)
+                .orient('horizontal')
+                .scale(color);
+            
+            svg.select(".legendLinear")
+                .call(legendLinear);
+
+
             });
 
         </script>
